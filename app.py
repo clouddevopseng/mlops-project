@@ -1,34 +1,36 @@
-import pandas as pd
+# Import Libraries
 import numpy as np
+import json
 import pickle
+from flask import Flask, request, jsonify
 
+app = Flask(__name__)
 
-from sklearn import linear_model
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import root_mean_squared_error
+@app.route('/predict', methods=['POST'])
+def predict():
+    # Load the model from disk
+    filename = 'model/rental_prediction_model.pkl'
+    model = pickle.load(open(filename, 'rb'))
 
-# Load dataset
-df = pd.read_csv('data/rental_1000.csv')
+    # Read input from request JSON
+    user_input = request.json
 
-# Features and Labels
-X = df[['rooms', 'sqft']].values
-y = df['price'].values
+    rooms = int(user_input.get('rooms', 0))
+    sqft = int(user_input.get('sqft', 0))
 
-# Split the Training Data and Testing Data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
+    user_input_prediction = np.array([[rooms, sqft]])
+    predicted_rental_price = model.predict(user_input_prediction)
 
-# Algorithm Selection - Linear Regression
-model = LinearRegression()
-model.fit(X_train, y_train)
+    # Predict the Rental Price
+    output = {"Rental Price Prediction Using Model": float(predicted_rental_price[0])}
 
-# Save the trained model to disk
-filename = 'model/rental_prediction_model.pkl'
-pickle.dump(model, open(filename, 'wb'))
+    # Write Outputs to outputs.json
+    with open('outputs/outputs.json', 'w') as f:
+        json.dump(output, f)
 
-# Evaluate the model
-y_pred = model.predict(X_test)
-rmse = root_mean_squared_error(y_test, y_pred)
-print('Root Mean Squared Error:', rmse)
+    # Return prediction as API response
+    return jsonify(output)
 
-print('Model Trained Successfully')
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
