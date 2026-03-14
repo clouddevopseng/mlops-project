@@ -29,8 +29,8 @@ def predict():
         json.dump(output, f)
 
     # Return prediction as API response
-    return jsonify(output)
+    # return jsonify(output)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# if __name__ == '__main__':
+    # app.run(host='0.0.0.0', port=5000, debug=True)
 
