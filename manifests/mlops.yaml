@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mlops-pod1
+spec:
+  containers:
+    - name: mlops-container
+      image: mlops-image:latest
+      ports:
+        - containerPort: 5000
+          hostPort: 5000
